@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign in</title>
+    <style>
+        body{
+            justify-items: center;
+        }
+        .outerdiv{
+            border: 2px solid black;
+            border-radius: 20px;
+            margin: 10%;
+            box-shadow: 10px 10px rgb(151, 150, 144);
+        }
+        .innerdiv{
+            padding: 5vh;
+            display: flex;
+            flex-direction: column;
+        }
+        input{
+            margin: 10px 0px 10px 0px;
+            border: 1px solid grey;
+            padding: 5px;
+            width: 30vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="outerdiv">
+        <form action="/" method="post">
+    <div class="innerdiv">
+        <h1>Sign In</h1>
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="Enter Email" required>
+        <label for="pass">Password</label>
+        <input type="password" id="pass" placeholder="Enter Password" required>
+        <a href="/signup">Don't have an account</a>
+        <input type="submit" id="btn">
+    </div>
+    </form>
+    </div>
+    <!-- <script>
+    const emailId = document.querySelector("#email");
+    const pass = document.querySelector("#pass");
+    const btn = document.querySelector("#btn");
+    btn.addEventListener('click', ()=>{
+        if (emailId.value.trim() !== "" && pass.value.trim() !== "") {
+            const users = JSON.parse(localStorage.getItem('user')) || [];
+            if(users.length===0){
+                alert("Don't have an account!");
+                return;
+            }
+            const alreadyE = users.find(user => user.email === emailId.value&& user.password === pass.value);
+            if(alreadyE){
+                // alert("Login successful!");
+                // window.location.href = 'login.html';
+                localStorage.setItem('currentUser', JSON.stringify(alreadyE));
+                if(alreadyE.role==="teacher"){
+                    window.location.href = 'teacher.html';
+                }
+                else{
+                    window.location.href = 'admin.html';
+                }
+            }
+            else{
+                alert("Wrong email or password!");
+            }
+        }
+        else{
+            alert("Please fill in both fields.");
+        }
+    }); 
+</script> -->
+<script>
+document.querySelector('form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const email = document.querySelector("#email").value.trim();
+  const password = document.querySelector("#pass").value.trim();
+
+  if (!email || !password) {
+    return alert("Please enter email and password.");
+  }
+
+  const data = { email, password };
+
+  try {
+    const response = await fetch('/', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      // Redirect based on role (role must be present in result)
+      if (result.role === 'teacher') {
+        window.location = '/teacher';
+      } else if (result.role === 'admin') {
+        window.location = '/admin';
+      } else {
+        // fallback
+        window.location = '/';
+      }
+    } else {
+      alert(result.message || 'Login failed');
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    alert("Something went wrong");
+  }
+});
+</script>
+
+</body>
+</html>

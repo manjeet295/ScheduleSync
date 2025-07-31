@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher</title>
+    <style>
+        * {
+        margin: 0;
+        padding: 0;
+        font-family: 'Segoe UI', sans-serif;
+        box-sizing: border-box;
+    }
+    body {
+        background-color: #ffffff;
+        display: flex;
+        height: 100vh;
+
+        color: #000;
+    }
+    .sidebar {
+        width: 220px;
+        background: #f0f0f0;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        padding-top: 20px;
+    }
+    .sidebar h1 {
+        color: #000;
+        font-size: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .menu {
+        padding-left: 20px;
+    }
+    .menu-item {
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        margin: 15px 0;
+        color: #000;
+        font-size: 16px;
+    }
+    .btn-event {
+        margin: 30px 15px;
+        padding: 10px;
+        background: #000;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        width: 90%;
+        font-size: 14px;
+    }
+    .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 20px 40px;
+    }
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .top-bar .datetime {
+        color: #333;
+        font-size: 14px;
+    }
+    .top-bar .datetime #clock {
+        font-size: 40px;
+    }
+    .top-bar .user {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 20px;
+        color: #000;
+    }
+    .top-bar .user span {
+        font-weight: bold;
+    }
+    .timetable-section {
+        margin-top: 30px;
+        
+        padding: 20px;
+        
+    }
+    
+    /* .timetable-section #show {
+        background: #000;
+        color: white;
+        border: none;
+        margin: 2vh;
+        float: right;
+        padding: 10px 15px;
+        border-radius: 5px;
+    } */
+     table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+    }
+    th, td {
+        border: 1px solid #ccc;
+        padding: 25px 15px;
+        font-size: 14px;
+    }
+    th {
+        background: #e0e0e0;
+        font-weight: bold;
+    } 
+    .top-bar .user div {
+        background: #ccc;
+        padding: 5px 10px;
+        border-radius: 50%;
+    }
+    .details {
+        display: flex;
+        justify-content: space-between;
+    }
+    .lectures{
+        border: 1px solid black;
+        display: flex;
+        width: 390px;
+        padding: 3vh;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .left{
+        border: 1px solid black;
+        display: flex;
+        width: 390px;
+        padding: 3vh;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .done{
+        border: 1px solid black;
+        display: flex;
+        width: 390px;
+        padding: 3vh;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .up-ad , .to-sc , .ad-pr {
+        border: 1px solid black;
+        width: 100%;
+        margin-top: 2vh;
+        padding: 3vh;
+        background: #f9f9f9;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+    .up-ad input , .to-sc input , .ad-pr input {
+        border: 1px solid black;
+        border-radius: 10px;
+        margin-top: 20px;
+        padding: 2vh;
+        width: 100%;
+        font-weight: 600;
+    }
+    .table-section {
+        margin-top: 30px;
+        padding: 20px;
+    }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+    <h1>Schedule Sync</h1>
+    <div class="menu">
+      <a href="#" id="dashboard" class="menu-item">Dashboard</a>
+      <a href="#" id="calendar" class="menu-item">Calendar</a>
+      <a href="#" id="app-leave" class="menu-item">ApproveLeave</a>
+      <a href="#" class="menu-item">Inbox</a>
+    </div>
+    <button class="btn-event">Upcoming Event</button>
+  </div>
+  <div class="main">
+    <div class="top-bar">
+      <div class="datetime">
+        <span id="clock">
+
+        </span>
+      </div>
+      <div class="user">
+        <span id="User-name">teachername</span>
+        <span id="User-role">(teacher)</span>
+        <form action="/logout" method="POST">
+          <button type="submit">Logout</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="timetable-section">
+      <div class="details">
+        <div class="lectures">
+            <span>📅</span>
+            <div>
+                <p id="lecno">0</p>
+                <p id="tl">Total lecture</p>
+            </div>
+        </div>
+        <div class="left">
+            <span>🕒</span>
+            <div>
+                <p id="lecleft">0</p>
+                <p id="tl">Total Left</p>
+            </div>
+        </div>
+        <div class="done">
+            <span>✔️</span>
+            <div>
+                <p id="lecdone">0</p>
+                <p id="tl">Total Done</p>
+            </div>
+        </div>
+      </div>
+      <div class="upcoming">
+        <div class="up-ad">
+            <h3 id="text">Upcoming Adjustments</h3>
+            <input type="text" id="up-ad-in" placeholder="No Adjustments Scheduled Yet" disabled>
+        </div>
+        <div class="to-sc">
+            <h3 id="text">Today Schedules</h3>
+            <input type="text" id="to-sc-in" placeholder="No Adjustments Scheduled Yet" disabled>
+        </div>
+        <div class="ad-pr">
+            <h3 id="text">Adjustments Proposals</h3>
+            <input type="text" id="ad-pr-in" placeholder="No Adjustments Scheduled Yet" disabled>
+        </div>
+        
+      </div>
+      
+    </div>
+    <div class="table-section">
+        <table>
+        <thead>
+          <tr>
+            <th>Days/Time</th>
+            <th>Period 1</th>
+            <th>Period 2</th>
+            <th>Period 3</th>
+            <th>Period 4</th>
+            <th>Period 5</th>
+            <th>Period 6</th>
+            <th>Period 7</th>
+            <th>Period 8</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Monday</td>
+            <td id="monday1"></td>
+            <td id="monday2"></td>
+            <td id="monday3"></td>
+            <td id="monday4"></td>
+            <td id="monday5"></td>
+            <td id="monday6"></td>
+            <td id="monday7"></td>
+            <td id="monday8"></td>
+        </tr>
+          <tr>
+            <td>Tuesday</td>
+            <td id="tuesday1"></td>
+            <td id="tuesday2"></td>
+            <td id="tuesday3"></td>
+            <td id="tuesday4"></td>
+            <td id="tuesday5"></td>
+            <td id="tuesday6"></td>
+            <td id="tuesday7"></td>
+            <td id="tuesday8"></td>
+        </tr>
+        <tr>
+            <td>Wednesday</td>
+            <td id="wednesday1"></td>
+            <td id="wednesday2"></td>
+            <td id="wednesday3"></td>
+            <td id="wednesday4"></td>
+            <td id="wednesday5"></td>
+            <td id="wednesday6"></td>
+            <td id="wednesday7"></td>
+            <td id="wednesday8"></td>
+        </tr>
+        <tr>
+            <td>Thursday</td>
+            <td id="thursday1"></td>
+            <td id="thursday2"></td>
+            <td id="thursday3"></td>
+            <td id="thursday4"></td>
+            <td id="thursday5"></td>
+            <td id="thursday6"></td>
+            <td id="thursday7"></td>
+            <td id="thursday8"></td>
+        </tr>
+        <tr>
+            <td>Friday</td>
+            <td id="friday1"></td>
+            <td id="friday2"></td>
+            <td id="friday3"></td>
+            <td id="friday4"></td>
+            <td id="friday5"></td>
+            <td id="friday6"></td>
+            <td id="friday7"></td>
+            <td id="friday8"></td>
+        </tr>
+        <tr>
+            <td>Saturday</td>
+            <td id="saturday1"></td>
+            <td id="saturday2"></td>
+            <td id="saturday3"></td>
+            <td id="saturday4"></td>
+            <td id="saturday5"></td>
+            <td id="saturday6"></td>
+            <td id="saturday7"></td>
+            <td id="saturday8"></td>
+        </tr>
+        
+
+        </tbody>
+      </table>
+    </div>
+  
+  <div class="side3" style="margin-top: 30px;">
+  <h3>Request Leave</h3>
+  <form id="leaveForm">
+    <input type="date" id="leaveDate" required />
+    <input type="text" id="leaveReason" placeholder="Reason for leave" required />
+    <button type="submit">Submit Leave Request</button>
+  </form>
+</div>
+</div>
+
+
+  <script>
+    // DOM se elements nikal rahe hain (naam, role, calendar, dashboard, details, table, lectures)
+    const userName = document.querySelector('#User-name');
+    const userRole = document.querySelector('#User-role');
+    const calendar = document.querySelector('#calendar');
+    const dashboard = document.querySelector('#dashboard');
+    const details = document.querySelector('.timetable-section');
+    const tableSection = document.querySelector('.table-section');
+    const lecno = document.querySelector('#lecno');
+    const lecleft = document.querySelector('#lecleft');
+    const lecdone = document.querySelector('#lecdone');
+    const side3 = document.querySelector('.side3');
+    const leaveform = document.querySelector('#leaveForm');
+    const appleave = document.querySelector('#app-leave');
+
+    // Table ko default mein hide kar rahe hain (sirf dashboard pe dikhegi)
+    tableSection.style.display = "none";
+    side3.style.display = "none";
+
+
+
+    // Real-time clock show karta hai (top bar mein)
+    function updateClock() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = now.getMinutes();
+      const seconds = now.getSeconds();
+      const ampm = hours >= 12 ? 'pm' : 'am';
+      hours = hours % 12 || 12;
+      document.getElementById('clock').textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} ${ampm}`;
+    }
+
+    // Calendar pe click karte hi timetable table dikhao, details hide karo
+    calendar.addEventListener('click',()=>{
+      details.style.display = "none";
+      tableSection.style.display = "block";
+      side3.style.display="none";
+    })
+    // Dashboard pe click karte hi details dikhao, table hide karo
+    dashboard.addEventListener('click',()=>{
+      details.style.display = "block";
+      tableSection.style.display = "none";
+      side3.style.display="none";
+    })
+    appleave.addEventListener('click',()=>{
+      details.style.display = "none";
+      tableSection.style.display = "none";
+      side3.style.display="flex";
+    })
+    
+
+    // Clock ko start karo aur har second update karo
+    updateClock();
+    setInterval(updateClock,1000);
+
+    // Current teacher ka info aur uska timetable backend se laata hai aur render karta hai
+    async function fetchAndRenderTeacher() {
+      try {
+        // Backend se current teacher ka data lao
+        const res = await fetch('/teacher/me');
+        if (res.status === 401) {
+          // Agar login nahi hai toh signin page pe bhej do
+          window.location.href = '/signin';
+          return;
+        }
+        if (!res.ok) return;
+        const teacher = await res.json();
+        if (!teacher || !Array.isArray(teacher.schedule)) return;
+        // Naam aur role UI pe set karo
+        userName.textContent = teacher.name;
+        userRole.textContent = `(${teacher.role})`;
+        // Timetable render karo
+        renderTimetable(teacher.schedule);
+      } catch (err) {
+        // Agar kuch error aaye toh chup chaap ignore karo
+      }
+    }
+
+    // Timetable table ko render karta hai (teacher ke lectures show karta hai)
+    function renderTimetable(schedule) {
+      const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+      for (let day of days) {
+        for (let i = 1; i <= 8; i++) {
+          const cell = document.getElementById(day + i);
+          if (cell) cell.innerHTML = "";
+        }
+      }
+      let count = 0;
+      // Only show current week's lectures
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
+      schedule.forEach(item => {
+        const { date, day, lectureNumber, subject, room, slot } = item;
+        if (!date || !day) return;
+        const jsDate = new Date(date);
+        if (jsDate < startOfWeek || jsDate > endOfWeek) return;
+        const dayId = day.toLowerCase() + lectureNumber;
+        const cell = document.getElementById(dayId);
+        let formattedDate = jsDate.toLocaleDateString();
+        if (cell) {
+          count++;
+          cell.innerHTML = `<div class='lecture-cell'>
+            <span class='lecture-subject'>${subject}</span><br>
+            <span class='lecture-room'>${room || ''}</span><br>
+            <span class='lecture-time'>${slot || ''}</span><br>
+            <span class='lecture-date'>${formattedDate}</span>
+          </div>`;
+        }
+      });
+      lecno.textContent = count;
+      lecleft.textContent = 0; 
+      lecdone.textContent = count; 
+    }
+
+
+    // Leave request form submit karte hi backend pe request bhejta hai
+
+    leaveform.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      // Date aur reason form se nikaal rahe hain
+      const date = document.getElementById('leaveDate').value;
+      const reason = document.getElementById('leaveReason').value;
+
+      // Basic validation (date/reason empty toh alert)
+      if (!date || !reason) {
+        alert('Date aur reason dono bharna zaroori hai.');
+        return;
+      }
+
+      try {
+        // Backend pe leave request bhej rahe hain
+        const res = await fetch('/teacher/request-leave', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ date, reason }),
+          credentials: 'include' // Session ko maintain karne ke liye
+        });
+
+        if (res.ok) {
+          alert("Leave request submitted. Adjustments pending admin approval.");
+          leaveform.reset(); // Form reset karo
+        } else {
+          // Agar backend se error aaye toh error message dikhao
+          const errMsg = await res.text();
+          alert("Error submitting leave request: " + errMsg);
+        }
+      } catch (err) {
+        alert("Server error. Try again.");
+      }
+    });
+
+
+    // Page load hote hi teacher ka timetable fetch aur render karo
+    fetchAndRenderTeacher();
+  </script>
+
+</body>
+</html>

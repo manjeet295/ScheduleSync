@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <style>
+        body{
+            justify-items: center;
+        }
+        .outerdiv{
+            border: 2px solid black;
+            border-radius: 20px;
+            margin: 8%;
+            box-shadow: 10px 10px rgb(151, 150, 144);
+        }
+        .innerdiv{
+            padding: 5vh;
+            display: flex;
+            flex-direction: column;
+        }
+        input{
+            margin: 10px 0px 10px 0px;
+            border: 1px solid grey;
+            padding: 5px;
+            width: 30vh;
+        }
+        select{
+            margin: 10px 0px 10px 0px;
+            border: 1px solid grey;
+            padding: 5px;
+            width: 30vh;
+        }
+    </style>
+</head>
+<body>
+    <div class="outerdiv">
+        <form action="/signup" method="post">
+    <div class="innerdiv">
+        <h1>Sign Up</h1>
+        <label for="name" >Name</label>
+        <input type="text" id="name" name="name" placeholder="Enter Name">
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email" placeholder="Enter Email">
+        <select name="role" id="role">
+            <option value="teacher">teacher</option>
+            <option value="admin">admin</option>
+        </select>
+
+        <label for="pass">Password</label>
+        <input type="password" name="password" id="pass" placeholder="Enter Password">
+        <a href="signin.html">Already have an account</a>
+        <input type="submit" id="btn">
+    </div>
+    </form>
+    </div>
+    <script>
+document.querySelector('#signup-form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const name = document.querySelector("#name").value.trim();
+  const email = document.querySelector("#email").value.trim();
+  const password = document.querySelector("#pass").value.trim();
+  const role = document.querySelector("#role").value;
+
+  if (!email || !password) {
+    return alert("Please enter email and password.");
+  }
+
+  const data = {
+    name,
+    email,
+    password,
+    role
+  };
+
+  try {
+    const response = await fetch('/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await response.text();
+
+    if (response.ok) {
+      alert("User registered successfully!");
+    } else {
+      alert("Signup failed: " + result);
+    }
+  } catch (err) {
+    console.error("Error:", err);
+    alert("Something went wrong");
+  }
+});
+</script>
+    <!-- <script>
+    const name = document.querySelector("#name")
+    const emailId = document.querySelector("#email");
+    const pass = document.querySelector("#pass");
+    const btn = document.querySelector("#btn");
+    const role = document.querySelector("#role");
+
+
+
+    btn.addEventListener('click', ()=>{
+        if(emailId.value.trim() !== "" && pass.value.trim() !== ""){
+            if(role.value==="teacher"){
+                const data = {
+                    name : name.value,
+                    email : emailId.value,
+                    role : role.value,
+                    password : pass.value,
+                    schedule : []
+                }
+                let users = JSON.parse(localStorage.getItem('user')) || [];
+                const userExists = users.find(user => user.email === data.email);
+                    if(userExists){
+                    alert("User already exists!");
+                }
+                else{
+                users.push(data);
+                localStorage.setItem('user', JSON.stringify(users));
+                alert("User registered successfully!");
+                window.location.href = 'signin.html';
+            }
+            }
+            else{
+            const data = {
+                name : name.value,
+                email: emailId.value,
+                role : role.value,
+                password: pass.value
+            };
+            let users = JSON.parse(localStorage.getItem('user')) || [];
+            const userExists = users.find(user => user.email === data.email);
+            if(userExists){
+                alert("User already exists!");
+            }
+            else{
+                users.push(data);
+                localStorage.setItem('user', JSON.stringify(users));
+                alert("User registered successfully!");
+                window.location.href = 'signin.html';
+            }
+        }
+    }
+        else{
+            alert("Please enter email and password.");
+        }
+    });
+</script> -->
+
+</body>
+</html>
