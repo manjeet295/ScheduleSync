@@ -26,8 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(express.static('public'));
-// Serve models directory for currentUser.json access
-app.use('/models', express.static(path.join(__dirname, 'models')));
+
 
 
 app.use(session({

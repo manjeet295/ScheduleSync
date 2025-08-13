@@ -90,61 +90,143 @@ async function info() {
 
 // ---------------------- RENDER TIMETABLE ----------------------
 // Timetable grid render karta hai (selected teacher ke lectures show karta hai)
+/* ---------- helpers ---------- */
+function toUTCDateOnly(date) {
+  // normalize a Date to UTC midnight (00:00:00) — returns a Date object in UTC midnight
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+}
+
+function getStartOfWeekUTC(now) {
+  // Monday as start of week (UTC)
+  const utcNow = toUTCDateOnly(now);
+  const dow = utcNow.getUTCDay(); // 0=Sun,1=Mon...
+  const diff = (dow + 6) % 7;     // days since Monday
+  const start = new Date(utcNow);
+  start.setUTCDate(utcNow.getUTCDate() - diff);
+  start.setUTCHours(0, 0, 0, 0);
+  return start;
+}
+
+function getEndOfWeekUTC(startOfWeek) {
+  // Monday + 5 days = Saturday (inclusive)
+  const end = new Date(startOfWeek);
+  end.setUTCDate(startOfWeek.getUTCDate() + 5);
+  end.setUTCHours(23, 59, 59, 999);
+  return end;
+}
+
+function weekdayNameFromUTC(date) {
+  const names = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  return names[date.getUTCDay()];
+}
+
+/* ---------- main ---------- */
 async function renderTimetable(email) {
   if (!email) return;
+
   try {
-    const response = await fetch('/admin/dash', {
-      method: 'GET',
-      credentials: 'include'
-    });
-    if (!response.ok) {
-      if (response.status !== 401) {
-        const text = await response.text();
-        alert('Timetable load nahi hua.\nStatus: ' + response.status + '\n' + text);
-        console.error('Dashboard fetch failed:', response.status, text);
+    const res = await fetch('/admin/dash', { method: 'GET', credentials: 'include' });
+    if (!res.ok) {
+      if (res.status !== 401) {
+        const text = await res.text();
+        alert('Timetable load nahi hua.\nStatus: ' + res.status + '\n' + text);
+        console.error('Dashboard fetch failed:', res.status, text);
       }
       return;
     }
-    const teachers = await response.json();
+
+    const teachers = await res.json();
     const teacher = teachers.find(t => t.email === email);
     if (!teacher || !Array.isArray(teacher.schedule)) {
       alert('No schedule found for this teacher.');
       return;
     }
-    // Clear all cells
-    const days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-    for (let day of days) {
-      for (let i = 1; i <= 8; i++) {
-        const cell = document.getElementById(day + i);
-        if (cell) cell.innerHTML = "";
+
+    // Clear timetable cells (expecting ids like monday1 .. saturday8)
+    const days = ["monday","tuesday","wednesday","thursday","friday","saturday"];
+    for (const d of days) {
+      for (let i=1; i<=8; i++) {
+        const el = document.getElementById(d + i);
+        if (el) el.innerHTML = "";
       }
     }
-    // Fill in the schedule using date to get day
-    const now = new Date();
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay()); // Sunday
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6); // Saturday
 
-    teacher.schedule.forEach(item => {
+    const now = new Date();
+    const startOfWeek = getStartOfWeekUTC(now);
+    const endOfWeek = getEndOfWeekUTC(startOfWeek);
+
+    // DEBUG: show week range in UTC
+    console.log('Week range (UTC):', startOfWeek.toISOString(), '->', endOfWeek.toISOString());
+
+    let hasLecturesThisWeek = false;
+
+    for (const item of teacher.schedule) {
       const { date, day, lectureNumber, subject, room, slot } = item;
-      if (!date || !day) return;
-      const jsDate = new Date(date);
-      // Only show lectures in current week
-      if (jsDate < startOfWeek || jsDate > endOfWeek) return;
-      const cell = document.getElementById(day.toLowerCase() + lectureNumber);
-      let formattedDate = jsDate.toLocaleDateString();
-      if (cell) {
-        cell.innerHTML = `
-  <div class="lecture-cell">
-    <span class="lecture-subject">${subject}</span>
-    <span class="lecture-room">${room || ''}</span>
-    <span class="lecture-time">${slot || ''}</span>
-    <span class="lecture-date">${formattedDate}</span>
-  </div>
-`;
+      if (!date) {
+        console.warn('Skipping schedule item with no date:', item);
+        continue;
       }
-    });
+
+      const parsed = new Date(date);
+      if (isNaN(parsed.getTime())) {
+        console.warn('Invalid date, skipping:', date);
+        continue;
+      }
+
+      // Normalize schedule date to UTC midnight
+      const jsDate = toUTCDateOnly(parsed);
+
+      // DEBUG each lecture's date
+      console.log('Lecture raw:', date, 'parsed UTC:', parsed.toISOString(), 'normalized UTC:', jsDate.toISOString());
+
+      // Filter: must be inside current week (Monday..Saturday)
+      if (jsDate < startOfWeek || jsDate > endOfWeek) {
+        console.log('Skipping (outside week):', jsDate.toISOString());
+        continue;
+      }
+
+      // Determine day string (use provided day if valid otherwise derive from date)
+      let dayStr = (typeof day === 'string' && day.trim()) ? day.trim().toLowerCase() : weekdayNameFromUTC(jsDate);
+      dayStr = dayStr.toLowerCase(); // safety
+
+      // Only accept monday..saturday
+      if (!['monday','tuesday','wednesday','thursday','friday','saturday'].includes(dayStr)) {
+        console.warn('Skipping lecture with unsupported day:', dayStr, 'item:', item);
+        continue;
+      }
+
+      // lectureNumber safety
+      if (!lectureNumber) {
+        console.warn('Skipping lecture with no lectureNumber:', item);
+        continue;
+      }
+
+      const cellId = dayStr + lectureNumber;
+      const cell = document.getElementById(cellId);
+      if (!cell) {
+        console.warn('No cell element for id:', cellId, '— check your HTML ids.');
+        continue;
+      }
+
+      hasLecturesThisWeek = true;
+      const formattedDate = jsDate.toLocaleDateString('en-GB'); // dd/mm/yyyy
+
+      cell.innerHTML = `
+        <div class="lecture-cell">
+          <div class="lecture-subject">${subject || ''}</div>
+          <div class="lecture-room">${room || ''}</div>
+          <div class="lecture-time">${slot || ''}</div>
+          <div class="lecture-date">${formattedDate}</div>
+        </div>
+      `;
+    }
+
+    if (!hasLecturesThisWeek) {
+      // optional: chrome will keep spamming alerts, consider showing toast instead
+      console.log('No lectures this week for', email);
+      // alert('Is hafte koi lecture schedule nahi hai.');
+    }
+
   } catch (err) {
     console.error('Error rendering timetable:', err);
     alert('Timetable load nahi hua.\n' + err);
@@ -207,6 +289,8 @@ document.getElementById("scheduleForm").addEventListener("submit", async functio
   // Get day name from date
   const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
   const day = dayNames[jsDate.getDay()];
+  console.log(day);
+  
 
   const slot = `${formatTime(startTime)}–${formatTime(endTime)}`;
   const newSchedule = { subject, room, date, day, slot, lectureNumber };
